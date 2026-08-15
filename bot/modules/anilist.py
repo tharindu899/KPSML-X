@@ -232,7 +232,12 @@ async def anilist(_, msg, aniid=None, u_id=None):
             if ed['day'] and ed['year']: enddate = f"{month_name[ed['month']]} {ed['day']}, {ed['year']}"
         except Exception:
             enddate = ""
-        season = f"{animeResp['season'].capitalize()} {animeResp['seasonYear']}"
+        if animeResp['season']:
+            season = f"{animeResp['season'].capitalize()} {animeResp['seasonYear']}"
+        elif animeResp['seasonYear']:
+            season = str(animeResp['seasonYear'])
+        else:
+            season = 'N/A'
         conname = (conn.get(alpha_2=animeResp['countryOfOrigin'])).name
         try:
             flagg = (conn.get(alpha_2=animeResp['countryOfOrigin'])).flag
@@ -252,8 +257,10 @@ async def anilist(_, msg, aniid=None, u_id=None):
         synonyms = ", ".join(animeResp['synonyms']) or ''
         siteurl = animeResp.get('siteUrl')
         trailer = animeResp.get('trailer', None)
-        if trailer and trailer.get('site') == "youtube":
+        if trailer and trailer.get('site') == "youtube" and trailer.get('id'):
             trailer = f"https://youtu.be/{trailer.get('id')}"
+        else:
+            trailer = None
         postup = datetime.fromtimestamp(animeResp['updatedAt']).strftime('%d %B, %Y')
         description = animeResp.get('description', 'N/A')
         if len(description) > 500:  
@@ -266,7 +273,8 @@ async def anilist(_, msg, aniid=None, u_id=None):
         coverimg = animeResp['coverImage']['large'] or ''
         title_img = f"https://img.anili.st/media/{siteid}"
         btns = ButtonMaker()
-        btns.ubutton("AniList Info 🎬", siteurl, 'header', style='blue')
+        if siteurl:
+            btns.ubutton("AniList Info 🎬", siteurl, 'header', style='blue')
         btns.ibutton("Reviews 📑", f"anime {user_id} rev {siteid}", style='blue')
         btns.ibutton("Tags 🎯", f"anime {user_id} tags {siteid}", style='blue')
         btns.ibutton("Relations 🧬", f"anime {user_id} rel {siteid}", style='blue')
@@ -288,8 +296,13 @@ async def anilist(_, msg, aniid=None, u_id=None):
             return template, btns.build_menu(3)
         try:
             await sendMessage(msg, template, btns.build_menu(3), photo=title_img)
-        except Exception:
-            await sendMessage(msg, template, btns.build_menu(3), photo='https://te.legra.ph/file/8a5155c0fc61cc2b9728c.jpg')
+        except Exception as e:
+            LOGGER.error(f"AniList photo send failed, retrying with fallback image: {e}")
+            try:
+                await sendMessage(msg, template, btns.build_menu(3), photo='https://te.legra.ph/file/8a5155c0fc61cc2b9728c.jpg')
+            except Exception as e2:
+                LOGGER.error(f"AniList fallback send also failed: {e2}")
+                await sendMessage(msg, template, btns.build_menu(3))
   
   
 async def setAnimeButtons(client, query):

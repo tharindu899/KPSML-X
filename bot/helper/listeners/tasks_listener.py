@@ -201,8 +201,14 @@ class MirrorLeechListener:
         await start_from_queued()
         user_dict = user_data.get(self.message.from_user.id, {})
         
-        if self.join and await aiopath.isdir(dl_path):
-            await join_files(dl_path)
+        if await aiopath.isdir(dl_path):
+            if self.join:
+                await join_files(dl_path)
+            else:
+                # Auto-join raw split video parts (movie.mkv.001, .002, ...)
+                # even without -j: there's no scenario where uploading them
+                # as unplayable raw chunks is the desired outcome.
+                await join_files(dl_path, video_only=True)
 
         if self.extract:
             pswd = self.extract if isinstance(self.extract, str) else ''

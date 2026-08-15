@@ -155,23 +155,53 @@ def check_storage_threshold(size, threshold, arch=False, alloc=False):
     return True
 
 
-async def join_files(path):
+SPLIT_PART_REGEX = r'^(.+\.\w{1,5})\.0*(\d+)$'
+
+VIDEO_EXTS = ('mkv', 'mp4', 'avi', 'ts', 'm4v', 'mov', 'wmv', 'webm', 'flv', 'mpg', 'mpeg')
+
+
+def _split_groups(files):
+    """Group raw split-part filenames (e.g. movie.mkv.001, movie.mkv.002, ...)
+    by their base name, keyed off a real extension preceding the numeric
+    suffix. Archive multi-volume splits (.7z.001, .zip.001, .r00 ...) are
+    excluded here since those are handled by the extractor instead."""
+    groups = {}
+    for file_ in files:
+        if is_archive_split(file_) or is_archive(file_):
+            continue
+        match = re_search(SPLIT_PART_REGEX, file_)
+        if not match:
+            continue
+        base, part_no = match.group(1), int(match.group(2))
+        groups.setdefault(base, []).append((part_no, file_))
+    return groups
+
+
+async def join_files(path, video_only=False):
     files = await listdir(path)
     results = []
-    for file_ in files:
-        if re_search(r"\.0+2$", file_) and await sync_to_async(get_mime_type, f'{path}/{file_}') == 'application/octet-stream':
-            final_name = file_.rsplit('.', 1)[0]
-            cmd = f'cat {path}/{final_name}.* > {path}/{final_name}'
-            _, stderr, code = await cmd_exec(cmd, True)
-            if code != 0:
-                LOGGER.error(f'Failed to join {final_name}, stderr: {stderr}')
-            else:
-                results.append(final_name)
+    for base, parts in _split_groups(files).items():
+        if len(parts) < 2:
+            continue
+        if video_only and not base.lower().endswith(VIDEO_EXTS):
+            continue
+        parts.sort(key=lambda x: x[0])
+        # Require a clean, contiguous 1..N sequence so we don't accidentally
+        # join an incomplete or unrelated set of files.
+        if [p[0] for p in parts] != list(range(parts[0][0], parts[0][0] + len(parts))):
+            LOGGER.warning(f'Skipping join for {base}: split parts are not contiguous')
+            continue
+        ordered_paths = ' '.join(f'{path}/{f}' for _, f in parts)
+        cmd = f'cat {ordered_paths} > {path}/{base}'
+        _, stderr, code = await cmd_exec(cmd, True)
+        if code != 0:
+            LOGGER.error(f'Failed to join {base}, stderr: {stderr}')
         else:
-            LOGGER.warning('No Binary files to join!')
+            results.append((base, [f for _, f in parts]))
     if results:
-        LOGGER.info('Join Completed!')
-        for res in results:
-            for file_ in files:
-                if re_search(fr"{res}\.0[0-9]+$", file_):
-                    await aioremove(f'{path}/{file_}')
+        LOGGER.info(f'Join Completed! Joined: {", ".join(r[0] for r in results)}')
+        for _, joined_parts in results:
+            for file_ in joined_parts:
+                await aioremove(f'{path}/{file_}')
+    else:
+        LOGGER.warning('No Binary files to join!')
