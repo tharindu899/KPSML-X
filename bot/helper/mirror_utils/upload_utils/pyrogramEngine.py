@@ -7,13 +7,14 @@ from time import time
 from PIL import Image
 from pyrogram.types import InputMediaVideo, InputMediaDocument, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait, RPCError, PeerIdInvalid, ChannelInvalid
-from asyncio import sleep
+from asyncio import sleep, create_subprocess_exec
+from asyncio.subprocess import PIPE
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type, RetryError
-from re import match as re_match, sub as re_sub
+from re import match as re_match, sub as re_sub, search as re_search
 from natsort import natsorted
 from aioshutil import copy
 
-from bot import config_dict, user_data, GLOBAL_EXTENSION_FILTER, bot, user, IS_PREMIUM_USER
+from bot import config_dict, user_data, GLOBAL_EXTENSION_FILTER, bot, user, IS_PREMIUM_USER, bot_cache
 from bot.helper.themes import BotTheme
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.telegram_helper.message_utils import sendCustomMsg, editReplyMarkup, sendMultiMessage, chat_info, deleteMessage, get_tg_link_content
@@ -426,16 +427,39 @@ class TgUploader:
                 real_ext = re_sub(r'\.0*\d{1,4}$', '', self.__up_path).upper()
                 if not real_ext.endswith(("MKV", "MP4")):
                     dirpath, file_ = self.__up_path.rsplit('/', 1)
-                    if self.__listener.seed and not self.__listener.newDir and not dirpath.endswith("/splited_files_mltb"):
-                        dirpath = f"{dirpath}/copied_mltb"
-                        await makedirs(dirpath, exist_ok=True)
-                        new_path = ospath.join(
-                            dirpath, f"{ospath.splitext(file_)[0]}.mp4")
-                        self.__up_path = await copy(self.__up_path, new_path)
-                    else:
-                        new_path = f"{ospath.splitext(self.__up_path)[0]}.mp4"
-                        await aiorename(self.__up_path, new_path)
-                        self.__up_path = new_path
+                    split_match = re_search(r'(\.0*\d{1,4})$', file_)
+                    suffix = split_match.group(1) if split_match else ''
+                    base = file_[:-len(suffix)] if suffix else file_
+                    new_name = f"{ospath.splitext(base)[0]}.mp4{suffix}"
+                    is_seed_copy = self.__listener.seed and not self.__listener.newDir and not dirpath.endswith("/splited_files_mltb")
+                    target_dir = dirpath
+                    if is_seed_copy:
+                        target_dir = f"{dirpath}/copied_mltb"
+                        await makedirs(target_dir, exist_ok=True)
+                    new_path = ospath.join(target_dir, new_name)
+                    remuxed = False
+                    if new_path != self.__up_path:
+                        cmd = [bot_cache['pkgs'][2], "-hide_banner", "-loglevel", "error",
+                               "-i", self.__up_path, "-map", "0", "-c", "copy", "-y", new_path]
+                        proc = await create_subprocess_exec(*cmd, stderr=PIPE)
+                        code = await proc.wait()
+                        if code == 0 and await aiopath.exists(new_path) and await aiopath.getsize(new_path) > 0:
+                            remuxed = True
+                            if not is_seed_copy:
+                                try:
+                                    await aioremove(self.__up_path)
+                                except Exception:
+                                    pass
+                            self.__up_path = new_path
+                        else:
+                            err = (await proc.stderr.read()).decode().strip()
+                            LOGGER.warning(f"ffmpeg remux to mp4 failed, falling back to plain rename: {err}")
+                    if not remuxed:
+                        if is_seed_copy:
+                            self.__up_path = await copy(self.__up_path, new_path)
+                        else:
+                            await aiorename(self.__up_path, new_path)
+                            self.__up_path = new_path
                 if self.__is_cancelled:
                     return
                 buttons = await self.__buttons(self.__up_path, is_video)
