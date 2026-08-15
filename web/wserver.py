@@ -229,6 +229,80 @@ input[type="submit"]:hover, input[type="submit"]:focus{
 .rename-btn:hover{
     background-color: #1565c0;
 }
+
+.rename-modal{
+    display: none;
+    position: fixed;
+    z-index: 10001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.rename-modal-content{
+    background-color: #161b22;
+    border: 2px solid rgba(255, 255, 255, 0.11);
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.rename-modal-content h2{
+    margin-bottom: 1rem;
+    font-size: 18px;
+}
+
+.rename-name-input{
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid white;
+    color: white;
+    font-size: inherit;
+    padding: 6px 4px;
+    width: 100%;
+}
+
+.rename-name-input:focus{
+    outline: none;
+    border-bottom: 2px solid #1e88e5;
+}
+
+.rename-modal-footer{
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+}
+
+.rename-modal-footer button{
+    margin: 0;
+    width: auto;
+    flex: 1;
+    padding: 0 1.5rem;
+    height: 5vh;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.11);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    color: white;
+}
+
+#renameSaveBtn{
+    background-color: #1e88e5;
+}
+#renameSaveBtn:hover{
+    background-color: #1565c0;
+}
+#renameCancelBtn{
+    background-color: transparent;
+}
+#renameCancelBtn:hover{
+    background-color: rgba(255, 255, 255, 0.068);
+}
 </style>
 <script>
 function s_validate() {
@@ -239,18 +313,35 @@ function s_validate() {
     }
 
 var TORRENT_ID = "{torrent_id}";
+var _renameTargetEl = null;
 
-function renameFile(el) {
+function openRenameModal(el) {
+    _renameTargetEl = el;
+    var oldName = el.getAttribute("data-name");
+    document.getElementById("renameInput").value = oldName;
+    document.getElementById("renameModal").style.display = "block";
+    document.getElementById("renameInput").focus();
+}
+
+function closeRenameModal() {
+    document.getElementById("renameModal").style.display = "none";
+    _renameTargetEl = null;
+}
+
+function submitRename() {
+    if (!_renameTargetEl) return;
+    var el = _renameTargetEl;
     var fid = el.getAttribute("data-fid");
     var oldPath = el.getAttribute("data-path");
     var oldName = el.getAttribute("data-name");
-    var newName = prompt("Rename file:", oldName);
-    if (!newName || newName.trim() === "" || newName === oldName) return;
+    var newName = document.getElementById("renameInput").value.trim();
+    closeRenameModal();
+    if (!newName || newName === oldName) return;
     el.textContent = "Renaming...";
     $.ajax({
         url: "/app/rename/" + TORRENT_ID,
         method: "POST",
-        data: { old_path: oldPath, new_name: newName.trim() },
+        data: { old_path: oldPath, new_name: newName },
         success: function () {
             location.reload();
         },
@@ -260,6 +351,17 @@ function renameFile(el) {
         }
     });
 }
+
+function renameFile(el) {
+    openRenameModal(el);
+}
+
+window.addEventListener("click", function(event) {
+    var modal = document.getElementById("renameModal");
+    if (event.target === modal) {
+        closeRenameModal();
+    }
+});
 </script>
 </head>
 <body>
@@ -279,6 +381,16 @@ function renameFile(el) {
         <a href="https://telegram.me/KPSBots"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
+    <div id="renameModal" class="rename-modal">
+      <div class="rename-modal-content">
+        <h2>Rename File</h2>
+        <input type="text" id="renameInput" class="rename-name-input" onkeypress="if(event.key==='Enter'){submitRename();}">
+        <div class="rename-modal-footer">
+          <button id="renameSaveBtn" onclick="submitRename()">Save</button>
+          <button id="renameCancelBtn" onclick="closeRenameModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
     <div id="sticks">
         <h4>Selected files: <b id="checked_files">0</b> of <b id="total_files">0</b></h4>
         <h4>Selected files size: <b id="checked_size">0</b> of <b id="total_size">0</b></h4>
