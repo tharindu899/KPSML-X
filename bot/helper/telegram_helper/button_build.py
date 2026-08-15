@@ -1,23 +1,33 @@
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from pyrogram.enums import ButtonStyle
+
+try:
+    from pyrogram.enums import ButtonStyle
+    _STYLE_SUPPORTED = True
+except ImportError:
+    ButtonStyle = None
+    _STYLE_SUPPORTED = False
 
 STYLE_MAP = {
-    'red': ButtonStyle.DANGER,
-    'danger': ButtonStyle.DANGER,
-    'green': ButtonStyle.SUCCESS,
-    'success': ButtonStyle.SUCCESS,
-    'blue': ButtonStyle.PRIMARY,
-    'primary': ButtonStyle.PRIMARY,
-    'default': ButtonStyle.DEFAULT,
+    'red': 'DANGER',
+    'danger': 'DANGER',
+    'green': 'SUCCESS',
+    'success': 'SUCCESS',
+    'blue': 'PRIMARY',
+    'primary': 'PRIMARY',
+    'default': 'DEFAULT',
 }
 
 
 def _resolve_style(style):
-    if style is None:
-        return ButtonStyle.DEFAULT
+    """Return a ButtonStyle if the installed pyrogram/pyrofork build supports
+    it, otherwise None (older pyrofork builds have no style/color param at
+    all on InlineKeyboardButton, so we must not pass one)."""
+    if not _STYLE_SUPPORTED or style is None:
+        return None
     if isinstance(style, ButtonStyle):
         return style
-    return STYLE_MAP.get(str(style).lower(), ButtonStyle.DEFAULT)
+    name = STYLE_MAP.get(str(style).lower())
+    return getattr(ButtonStyle, name, None) if name else None
 
 
 class ButtonMaker:
@@ -29,30 +39,36 @@ class ButtonMaker:
         self.__footer_button = []
 
     def ubutton(self, key, link, position=None, style=None):
-        style = _resolve_style(style)
+        kwargs = {'text': key, 'url': link}
+        resolved = _resolve_style(style)
+        if resolved is not None:
+            kwargs['style'] = resolved
         if not position:
-            self.__button.append(InlineKeyboardButton(text=key, url=link, style=style))
+            self.__button.append(InlineKeyboardButton(**kwargs))
         elif position == 'header':
-            self.__header_button.append(InlineKeyboardButton(text=key, url=link, style=style))
+            self.__header_button.append(InlineKeyboardButton(**kwargs))
         elif position == 'f_body':
-            self.__first_body_button.append(InlineKeyboardButton(text=key, url=link, style=style))
+            self.__first_body_button.append(InlineKeyboardButton(**kwargs))
         elif position == 'l_body':
-            self.__last_body_button.append(InlineKeyboardButton(text=key, url=link, style=style))
+            self.__last_body_button.append(InlineKeyboardButton(**kwargs))
         elif position == 'footer':
-            self.__footer_button.append(InlineKeyboardButton(text=key, url=link, style=style))
+            self.__footer_button.append(InlineKeyboardButton(**kwargs))
 
     def ibutton(self, key, data, position=None, style=None):
-        style = _resolve_style(style)
+        kwargs = {'text': key, 'callback_data': data}
+        resolved = _resolve_style(style)
+        if resolved is not None:
+            kwargs['style'] = resolved
         if not position:
-            self.__button.append(InlineKeyboardButton(text=key, callback_data=data, style=style))
+            self.__button.append(InlineKeyboardButton(**kwargs))
         elif position == 'header':
-            self.__header_button.append(InlineKeyboardButton(text=key, callback_data=data, style=style))
+            self.__header_button.append(InlineKeyboardButton(**kwargs))
         elif position == 'f_body':
-            self.__first_body_button.append(InlineKeyboardButton(text=key, callback_data=data, style=style))
+            self.__first_body_button.append(InlineKeyboardButton(**kwargs))
         elif position == 'l_body':
-            self.__last_body_button.append(InlineKeyboardButton(text=key, callback_data=data, style=style))
+            self.__last_body_button.append(InlineKeyboardButton(**kwargs))
         elif position == 'footer':
-            self.__footer_button.append(InlineKeyboardButton(text=key, callback_data=data, style=style))
+            self.__footer_button.append(InlineKeyboardButton(**kwargs))
 
     def build_menu(self, b_cols=1, h_cols=8, fb_cols=2, lb_cols=2, f_cols=8):
         menu = [self.__button[i:i+b_cols]
