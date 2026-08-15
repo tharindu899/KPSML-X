@@ -103,7 +103,7 @@ def create_list(par, msg, qbit=False):
             msg[0] += f'<input type="hidden" value="off" name="filenode_{i.file_id}">'
             if qbit:
                 full_path = getattr(i, 'full_path', i.name)
-                msg[0] += f' <span class="rename-btn" title="Rename file" onclick="renameFile(this)" data-fid="{i.file_id}" data-path="{full_path}" data-name="{i.name}">🔵 ✏️ Rename</span>'
+                msg[0] += f' <span class="rename-btn" title="Rename file" onclick="renameFile(this)" data-fid="{i.file_id}" data-path="{full_path}" data-name="{i.name}">Rename</span>'
             msg[0] += "</li>"
 
     if par.name != ".unwanted":

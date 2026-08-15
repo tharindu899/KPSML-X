@@ -30,9 +30,9 @@ async def driveclean(_, message):
     except (KeyError, IndexError):
         return await editMessage(clean_msg, "Google Drive ID could not be found in the provided link")
     buttons = ButtonMaker()
-    buttons.ibutton('🔴 Move to Bin', f'gdclean clear {drive_id} trash')
-    buttons.ibutton('🔴 Permanent Clean', f'gdclean clear {drive_id}')
-    buttons.ibutton('🔴 Stop GDrive Clean', 'gdclean stop', 'footer')
+    buttons.ibutton('Move to Bin', f'gdclean clear {drive_id} trash', style='red')
+    buttons.ibutton('Permanent Clean', f'gdclean clear {drive_id}', style='red')
+    buttons.ibutton('Stop GDrive Clean', 'gdclean stop', 'footer', style='red')
     await editMessage(clean_msg, f'''⌬ <b><i>GDrive Clean/Trash :</i></b>
     
 ┎ <b>Name:</b> {name}

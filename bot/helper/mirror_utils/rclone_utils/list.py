@@ -158,26 +158,26 @@ class RcloneList:
         if items_no > LIST_LIMIT:
             for i in [1, 2, 4, 6, 10, 30, 50, 100]:
                 buttons.ibutton(i, f'rcq ps {i}', position='header')
-            buttons.ibutton('🔵 Previous', 'rcq pre', position='footer')
-            buttons.ibutton('🔵 Next', 'rcq nex', position='footer')
+            buttons.ibutton('Previous', 'rcq pre', position='footer', style='blue')
+            buttons.ibutton('Next', 'rcq nex', position='footer', style='blue')
         if self.list_status == 'rcd':
             if self.item_type == '--dirs-only':
                 buttons.ibutton(
-                    '🔵 Files', 'rcq itype --files-only', position='footer')
+                    'Files', 'rcq itype --files-only', position='footer', style='blue')
             else:
                 buttons.ibutton(
-                    '🔵 Folders', 'rcq itype --dirs-only', position='footer')
+                    'Folders', 'rcq itype --dirs-only', position='footer', style='blue')
         if self.list_status == 'rcu' or len(self.path_list) > 0:
-            buttons.ibutton('🔵 Choose Current Path',
-                            'rcq cur', position='footer')
+            buttons.ibutton('Choose Current Path',
+                            'rcq cur', position='footer', style='blue')
         if self.list_status == 'rcu':
-            buttons.ibutton('🔵 Set as Default Path',
-                            'rcq def', position='footer')
+            buttons.ibutton('Set as Default Path',
+                            'rcq def', position='footer', style='blue')
         if self.path or len(self.__sections) > 1 or self.__rc_user and self.__rc_owner:
-            buttons.ibutton('🔵 Back', 'rcq back pa', position='footer')
+            buttons.ibutton('Back', 'rcq back pa', position='footer', style='blue')
         if self.path:
-            buttons.ibutton('🔵 Back To Root', 'rcq root', position='footer')
-        buttons.ibutton('🔴 Cancel', 'rcq cancel', position='footer')
+            buttons.ibutton('Back To Root', 'rcq root', position='footer', style='blue')
+        buttons.ibutton('Cancel', 'rcq cancel', position='footer', style='red')
         button = buttons.build_menu(f_cols=2)
         msg = 'Choose Path:' + ('\nTransfer Type: <i>Download</i>' if self.list_status ==
                                 'rcd' else '\nTransfer Type: <i>Upload</i>')
@@ -239,8 +239,8 @@ class RcloneList:
             for remote in self.__sections:
                 buttons.ibutton(remote, f'rcq re {remote}:')
             if self.__rc_user and self.__rc_owner:
-                buttons.ibutton('🔵 Back', 'rcq back re', position='footer')
-            buttons.ibutton('🔴 Cancel', 'rcq cancel', position='footer')
+                buttons.ibutton('Back', 'rcq back re', position='footer', style='blue')
+            buttons.ibutton('Cancel', 'rcq cancel', position='footer', style='red')
             button = buttons.build_menu(2)
             await self.__send_list_message(msg, button)
 
@@ -251,9 +251,9 @@ class RcloneList:
                  'rcd' else '\nTransfer Type: Upload')
             msg += f'\nTimeout: {get_readable_time(self.__timeout-(time()-self.__time))}'
             buttons = ButtonMaker()
-            buttons.ibutton('🔵 Owner Config', 'rcq owner')
-            buttons.ibutton('🔵 My Config', 'rcq user')
-            buttons.ibutton('🔴 Cancel', 'rcq cancel')
+            buttons.ibutton('Owner Config', 'rcq owner', style='blue')
+            buttons.ibutton('My Config', 'rcq user', style='blue')
+            buttons.ibutton('Cancel', 'rcq cancel', style='red')
             button = buttons.build_menu(2)
             await self.__send_list_message(msg, button)
         else:

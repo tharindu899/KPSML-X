@@ -57,7 +57,7 @@ async def start(client, message):
             return await sendMessage(message, BotTheme('USED_TOKEN'))
         elif config_dict['LOGIN_PASS'] is not None and data['token'] == config_dict['LOGIN_PASS']:
             return await sendMessage(message, BotTheme('LOGGED_PASSWORD'))
-        buttons.ibutton(BotTheme('ACTIVATE_BUTTON'), f'pass {input_token}', 'header')
+        buttons.ibutton(BotTheme('ACTIVATE_BUTTON'), f'pass {input_token}', 'header', style='green')
         reply_markup = buttons.build_menu(2)
         msg = BotTheme('TOKEN_MSG', token=input_token, validity=get_readable_time(int(config_dict["TOKEN_TIMEOUT"])))
         return await sendMessage(message, msg, reply_markup)
@@ -163,11 +163,11 @@ async def search_images():
 async def bot_help(client, message):
     buttons = ButtonMaker()
     user_id = message.from_user.id
-    buttons.ibutton(BotTheme('BASIC_BT'), f'kpsmlx {user_id} guide basic')
-    buttons.ibutton(BotTheme('USER_BT'), f'kpsmlx {user_id} guide users')
-    buttons.ibutton(BotTheme('MICS_BT'), f'kpsmlx {user_id} guide miscs')
-    buttons.ibutton(BotTheme('O_S_BT'), f'kpsmlx {user_id} guide admin')
-    buttons.ibutton(BotTheme('CLOSE_BT'), f'kpsmlx {user_id} close')
+    buttons.ibutton(BotTheme('BASIC_BT'), f'kpsmlx {user_id} guide basic', style='blue')
+    buttons.ibutton(BotTheme('USER_BT'), f'kpsmlx {user_id} guide users', style='blue')
+    buttons.ibutton(BotTheme('MICS_BT'), f'kpsmlx {user_id} guide miscs', style='blue')
+    buttons.ibutton(BotTheme('O_S_BT'), f'kpsmlx {user_id} guide admin', style='blue')
+    buttons.ibutton(BotTheme('CLOSE_BT'), f'kpsmlx {user_id} close', style='red')
     await sendMessage(message, BotTheme('HELP_HEADER'), buttons.build_menu(2))
 
 

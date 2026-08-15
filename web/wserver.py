@@ -246,7 +246,7 @@ function renameFile(el) {
     var oldName = el.getAttribute("data-name");
     var newName = prompt("Rename file:", oldName);
     if (!newName || newName.trim() === "" || newName === oldName) return;
-    el.textContent = "🔵 Renaming...";
+    el.textContent = "Renaming...";
     $.ajax({
         url: "/app/rename/" + TORRENT_ID,
         method: "POST",
@@ -256,7 +256,7 @@ function renameFile(el) {
         },
         error: function (xhr) {
             alert("Rename failed: " + (xhr.responseText || "Unknown error"));
-            el.textContent = "🔵 ✏️ Rename";
+            el.textContent = "Rename";
         }
     });
 }

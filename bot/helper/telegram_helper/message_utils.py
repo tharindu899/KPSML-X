@@ -333,13 +333,13 @@ async def open_category_btns(message):
     _tick = True
     if len(utds := await fetch_user_tds(user_id)) > 1:
         for _name in utds.keys():
-            buttons.ibutton(f'{"✅️" if _tick else ""} {_name}', f"scat {user_id} {msg_id} {_name.replace(' ', '_')}")
+            buttons.ibutton(f'{"✅️" if _tick else ""} {_name}', f"scat {user_id} {msg_id} {_name.replace(' ', '_')}", style='green' if _tick else 'blue')
             if _tick: _tick, cat_name = False, _name
     elif len(categories_dict) > 1:
         for _name in categories_dict.keys():
-            buttons.ibutton(f'{"✅️" if _tick else ""} {_name}', f"scat {user_id} {msg_id} {_name.replace(' ', '_')}")
+            buttons.ibutton(f'{"✅️" if _tick else ""} {_name}', f"scat {user_id} {msg_id} {_name.replace(' ', '_')}", style='green' if _tick else 'blue')
             if _tick: _tick, cat_name = False, _name
-    buttons.ibutton('🔴 Cancel', f'scat {user_id} {msg_id} scancel', 'footer')
+    buttons.ibutton('Cancel', f'scat {user_id} {msg_id} scancel', 'footer', style='red')
     buttons.ibutton(f'Done (60)', f'scat {user_id} {msg_id} sdone', 'footer')
     prompt = await sendMessage(message, f'<b>Select the category where you want to upload</b>\n\n<i><b>Upload Category:</b></i> <code>{cat_name}</code>\n\n<b>Timeout:</b> 60 sec', buttons.build_menu(3))
     start_time = time()
@@ -364,10 +364,10 @@ async def open_dump_btns(message):
     _tick = True
     if len(udmps := await fetch_user_dumps(user_id)) > 1:
         for _name in udmps.keys():
-            buttons.ibutton(f'{"✅️" if _tick else ""} {_name}', f"dcat {user_id} {msg_id} {_name.replace(' ', '_')}")
+            buttons.ibutton(f'{"✅️" if _tick else ""} {_name}', f"dcat {user_id} {msg_id} {_name.replace(' ', '_')}", style='green' if _tick else 'blue')
             if _tick: _tick, cat_name = False, _name
-    buttons.ibutton('🟢 Upload in All', f'dcat {user_id} {msg_id} All', 'header')
-    buttons.ibutton('🔴 Cancel', f'dcat {user_id} {msg_id} dcancel', 'footer')
+    buttons.ibutton('Upload in All', f'dcat {user_id} {msg_id} All', 'header', style='green')
+    buttons.ibutton('Cancel', f'dcat {user_id} {msg_id} dcancel', 'footer', style='red')
     buttons.ibutton(f'Done (60)', f'dcat {user_id} {msg_id} ddone', 'footer')
     prompt = await sendMessage(message, f'<b>Select the Dump category where you want to upload</b>\n\n<i><b>Upload Category:</b></i> <code>{cat_name}</code>\n\n<b>Timeout:</b> 60 sec', buttons.build_menu(3))
     start_time = time()
@@ -427,5 +427,5 @@ async def check_botpm(message, button=None):
         if button is None:
             button = ButtonMaker()
         _msg = "<i>You didn't START the bot in PM (Private)</i>"
-        button.ubutton("🟢 Start Bot Now", f"https://t.me/{bot_name}?start=start", 'header')
+        button.ubutton("Start Bot Now", f"https://t.me/{bot_name}?start=start", 'header', style='green')
         return _msg, button

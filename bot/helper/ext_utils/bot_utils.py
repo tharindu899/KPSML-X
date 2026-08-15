@@ -112,12 +112,12 @@ def bt_selection_buttons(id_):
     buttons = ButtonMaker()
     BASE_URL = config_dict['BASE_URL']
     if config_dict['WEB_PINCODE']:
-        buttons.ubutton("🟢 Select Files", f"{BASE_URL}/app/files/{id_}")
-        buttons.ibutton("🔵 Pincode", f"btsel pin {gid} {pincode}")
+        buttons.ubutton("Select Files", f"{BASE_URL}/app/files/{id_}", style='green')
+        buttons.ibutton("Pincode", f"btsel pin {gid} {pincode}", style='blue')
     else:
-        buttons.ubutton("🟢 Select Files", f"{BASE_URL}/app/files/{id_}?pin_code={pincode}")
-    buttons.ibutton("🔴 Cancel", f"btsel rm {gid} {id_}")
-    buttons.ibutton("🟢 Done Selecting", f"btsel done {gid} {id_}")
+        buttons.ubutton("Select Files", f"{BASE_URL}/app/files/{id_}?pin_code={pincode}", style='green')
+    buttons.ibutton("Cancel", f"btsel rm {gid} {id_}", style='red')
+    buttons.ibutton("Done Selecting", f"btsel done {gid} {id_}", style='green')
     return buttons.build_menu(2)
 
 
@@ -503,13 +503,13 @@ async def compare_versions(v1, v2):
 async def get_stats(event, key="home"):
     user_id = event.from_user.id
     btns = ButtonMaker()
-    btns.ibutton('🔵 Back', f'kpsmlx {user_id} stats home')
+    btns.ibutton('Back', f'kpsmlx {user_id} stats home', style='blue')
     if key == "home":
         btns = ButtonMaker()
-        btns.ibutton('🔵 Bot Stats', f'kpsmlx {user_id} stats stbot')
-        btns.ibutton('🔵 OS Stats', f'kpsmlx {user_id} stats stsys')
-        btns.ibutton('🔵 Repo Stats', f'kpsmlx {user_id} stats strepo')
-        btns.ibutton('🔵 Bot Limits', f'kpsmlx {user_id} stats botlimits')
+        btns.ibutton('Bot Stats', f'kpsmlx {user_id} stats stbot', style='blue')
+        btns.ibutton('OS Stats', f'kpsmlx {user_id} stats stsys', style='blue')
+        btns.ibutton('Repo Stats', f'kpsmlx {user_id} stats strepo', style='blue')
+        btns.ibutton('Bot Limits', f'kpsmlx {user_id} stats botlimits', style='blue')
         msg = "⌬ <b><i>Bot & OS Statistics!</i></b>"
     elif key == "stbot":
         total, used, free, disk = disk_usage('/')
@@ -589,7 +589,7 @@ async def get_stats(event, key="home"):
                 UT = ('∞' if (val := config_dict['USER_MAX_TASKS']) == '' else val),
                 BT = ('∞' if (val := config_dict['BOT_MAX_TASKS']) == '' else val),
         )
-    btns.ibutton('🔴 Close', f'kpsmlx {user_id} close')
+    btns.ibutton('Close', f'kpsmlx {user_id} close', style='red')
     return msg, btns.build_menu(2)
 
 
@@ -663,7 +663,7 @@ async def checking_access(user_id, button=None):
         if button is None:
             button = ButtonMaker()
         encrypt_url = b64encode(f"{token}&&{user_id}".encode()).decode()
-        button.ubutton('🟢 Generate New Token', short_url(f'https://t.me/{bot_name}?start={encrypt_url}'))
+        button.ubutton('Generate New Token', short_url(f'https://t.me/{bot_name}?start={encrypt_url}'), style='green')
         return f'<i>Temporary Token has been expired,</i> Kindly generate a New Temp Token to start using bot Again.\n<b>Validity :</b> <code>{get_readable_time(config_dict["TOKEN_TIMEOUT"])}</code>', button
     return None, button
 

@@ -189,7 +189,7 @@ def __api_buttons(user_id, method):
     buttons = ButtonMaker()
     for data, name in SITES.items():
         buttons.ibutton(name, f"torser {user_id} {data} {method}")
-    buttons.ibutton("🔴 Cancel", f"torser {user_id} cancel")
+    buttons.ibutton("Cancel", f"torser {user_id} cancel", style='red')
     return buttons.build_menu(2)
 
 
@@ -204,8 +204,8 @@ async def __plugin_buttons(user_id):
     for siteName in PLUGINS:
         buttons.ibutton(siteName.capitalize(),
                         f"torser {user_id} {siteName} plugin")
-    buttons.ibutton('🔵 All', f"torser {user_id} all plugin")
-    buttons.ibutton("🔴 Cancel", f"torser {user_id} cancel")
+    buttons.ibutton('All', f"torser {user_id} all plugin", style='blue')
+    buttons.ibutton("Cancel", f"torser {user_id} cancel", style='red')
     return buttons.build_menu(2)
 
 
@@ -223,15 +223,15 @@ async def torrentSearch(_, message):
     elif len(key) == 1 and SITES is None:
         await sendMessage(message, "Send a search key along with command")
     elif len(key) == 1:
-        buttons.ibutton('🔵 Trending', f"torser {user_id} apitrend")
-        buttons.ibutton('🔵 Recent', f"torser {user_id} apirecent")
-        buttons.ibutton("🔴 Cancel", f"torser {user_id} cancel")
+        buttons.ibutton('Trending', f"torser {user_id} apitrend", style='blue')
+        buttons.ibutton('Recent', f"torser {user_id} apirecent", style='blue')
+        buttons.ibutton("Cancel", f"torser {user_id} cancel", style='red')
         button = buttons.build_menu(2)
         await sendMessage(message, "Send a search key along with command", button)
     elif SITES is not None and SEARCH_PLUGINS:
-        buttons.ibutton('🔵 Api', f"torser {user_id} apisearch")
-        buttons.ibutton('🔵 Plugins', f"torser {user_id} plugin")
-        buttons.ibutton("🔴 Cancel", f"torser {user_id} cancel")
+        buttons.ibutton('Api', f"torser {user_id} apisearch", style='blue')
+        buttons.ibutton('Plugins', f"torser {user_id} plugin", style='blue')
+        buttons.ibutton("Cancel", f"torser {user_id} cancel", style='red')
         button = buttons.build_menu(2)
         await sendMessage(message, 'Choose tool to search:', button)
     elif SITES is not None:

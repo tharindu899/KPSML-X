@@ -58,11 +58,11 @@ async def pictures(_, message):
         to_edit = await sendMessage(message, "<i>Generating Grid of your Images...</i>")
         buttons = ButtonMaker()
         user_id = message.from_user.id
-        buttons.ibutton("🔵 <<", f"images {user_id} turn -1")
-        buttons.ibutton("🔵 >>", f"images {user_id} turn 1")
-        buttons.ibutton("🔴 Remove Image", f"images {user_id} remov 0")
-        buttons.ibutton("🔴 Close", f"images {user_id} close")
-        buttons.ibutton("🔴 Remove All", f"images {user_id} removall", 'footer')
+        buttons.ibutton("<<", f"images {user_id} turn -1", style='blue')
+        buttons.ibutton(">>", f"images {user_id} turn 1", style='blue')
+        buttons.ibutton("Remove Image", f"images {user_id} remov 0", style='red')
+        buttons.ibutton("Close", f"images {user_id} close", style='red')
+        buttons.ibutton("Remove All", f"images {user_id} removall", 'footer', style='red')
         await deleteMessage(to_edit)
         await sendMessage(message, f'🌄 <b>Image No. : 1 / {len(config_dict["IMAGES"])}</b>', buttons.build_menu(2), config_dict['IMAGES'][0])
 
@@ -81,11 +81,11 @@ async def pics_callback(_, query):
         no = len(config_dict['IMAGES']) - abs(ind+1) if ind < 0 else ind + 1
         pic_info = f'🌄 <b>Image No. : {no} / {len(config_dict["IMAGES"])}</b>'
         buttons = ButtonMaker()
-        buttons.ibutton("🔵 <<", f"images {data[1]} turn {ind-1}")
-        buttons.ibutton("🔵 >>", f"images {data[1]} turn {ind+1}")
-        buttons.ibutton("🔴 Remove Image", f"images {data[1]} remov {ind}")
-        buttons.ibutton("🔴 Close", f"images {data[1]} close")
-        buttons.ibutton("🔴 Remove All", f"images {data[1]} removall", 'footer')
+        buttons.ibutton("<<", f"images {data[1]} turn {ind-1}", style='blue')
+        buttons.ibutton(">>", f"images {data[1]} turn {ind+1}", style='blue')
+        buttons.ibutton("Remove Image", f"images {data[1]} remov {ind}", style='red')
+        buttons.ibutton("Close", f"images {data[1]} close", style='red')
+        buttons.ibutton("Remove All", f"images {data[1]} removall", 'footer', style='red')
         await editMessage(message, pic_info, buttons.build_menu(2), config_dict['IMAGES'][ind])
     elif data[2] == "remov":
         config_dict['IMAGES'].pop(int(data[3]))
@@ -100,11 +100,11 @@ async def pics_callback(_, query):
         ind = len(config_dict['IMAGES']) - abs(ind) if ind < 0 else ind
         pic_info = f'🌄 <b>Image No. : {ind+1} / {len(config_dict["IMAGES"])}</b>'
         buttons = ButtonMaker()
-        buttons.ibutton("🔵 <<", f"images {data[1]} turn {ind-1}")
-        buttons.ibutton("🔵 >>", f"images {data[1]} turn {ind+1}")
-        buttons.ibutton("🔴 Remove Image", f"images {data[1]} remov {ind}")
-        buttons.ibutton("🔴 Close", f"images {data[1]} close")
-        buttons.ibutton("🔴 Remove All", f"images {data[1]} removall", 'footer')
+        buttons.ibutton("<<", f"images {data[1]} turn {ind-1}", style='blue')
+        buttons.ibutton(">>", f"images {data[1]} turn {ind+1}", style='blue')
+        buttons.ibutton("Remove Image", f"images {data[1]} remov {ind}", style='red')
+        buttons.ibutton("Close", f"images {data[1]} close", style='red')
+        buttons.ibutton("Remove All", f"images {data[1]} removall", 'footer', style='red')
         await editMessage(message, pic_info, buttons.build_menu(2), config_dict['IMAGES'][ind])
     elif data[2] == 'removall':
         config_dict['IMAGES'].clear()

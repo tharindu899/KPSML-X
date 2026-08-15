@@ -266,14 +266,14 @@ async def anilist(_, msg, aniid=None, u_id=None):
         coverimg = animeResp['coverImage']['large'] or ''
         title_img = f"https://img.anili.st/media/{siteid}"
         btns = ButtonMaker()
-        btns.ubutton("🔵 AniList Info 🎬", siteurl, 'header')
-        btns.ibutton("🔵 Reviews 📑", f"anime {user_id} rev {siteid}")
-        btns.ibutton("🔵 Tags 🎯", f"anime {user_id} tags {siteid}")
-        btns.ibutton("🔵 Relations 🧬", f"anime {user_id} rel {siteid}")
-        btns.ibutton("🔵 Streaming Sites 📊", f"anime {user_id} sts {siteid}")
-        btns.ibutton("🔵 Characters 👥️️", f"anime {user_id} cha {siteid}")
+        btns.ubutton("AniList Info 🎬", siteurl, 'header', style='blue')
+        btns.ibutton("Reviews 📑", f"anime {user_id} rev {siteid}", style='blue')
+        btns.ibutton("Tags 🎯", f"anime {user_id} tags {siteid}", style='blue')
+        btns.ibutton("Relations 🧬", f"anime {user_id} rel {siteid}", style='blue')
+        btns.ibutton("Streaming Sites 📊", f"anime {user_id} sts {siteid}", style='blue')
+        btns.ibutton("Characters 👥️️", f"anime {user_id} cha {siteid}", style='blue')
         if trailer:
-            btns.ubutton("🔵 Trailer 🎞", trailer, 'header')
+            btns.ubutton("Trailer 🎞", trailer, 'header', style='blue')
         aniListTemp = ''
         if user_id in user_data:
             aniListTemp = user_data[user_id].get('ani_temp', '')
@@ -299,7 +299,7 @@ async def setAnimeButtons(client, query):
     data = data.split()
     siteid = data[3]
     btns = ButtonMaker()
-    btns.ibutton("🔴 ⌫ Back", f"anime {data[1]} home {siteid}")
+    btns.ibutton("⌫ Back", f"anime {data[1]} home {siteid}", style='red')
     if user_id != int(data[1]):
         await query.answer(text="Not Yours!", show_alert=True)
         return
@@ -391,7 +391,7 @@ async def setCharacButtons(client, query):
     data = query.data
     data = data.split()
     btns = ButtonMaker()
-    btns.ibutton("🔴 ⌫ Back", f"cha {data[1]} home {data[3]}")
+    btns.ibutton("⌫ Back", f"cha {data[1]} home {data[3]}", style='red')
     if user_id != int(data[1]):
         await query.answer(text="Not Yours!", show_alert=True)
         return
@@ -430,7 +430,7 @@ async def manga(_, message):
         msg = msg[:-2]
         info = json['siteUrl']
         buttons = ButtonMaker()
-        buttons.ubutton("🔵 AniList Info", info)
+        buttons.ubutton("AniList Info", info, style='blue')
         bimage = json.get("bannerImage", False)
         image = f"https://img.anili.st/media/{json.get('id')}"
         msg += f"\n\n_{json.get('description', None)}_"
