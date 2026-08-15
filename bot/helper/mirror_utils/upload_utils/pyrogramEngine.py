@@ -399,7 +399,7 @@ class TgUploader:
                                                                        document=self.__up_path,
                                                                        thumb=thumb,
                                                                        caption=cap_mono,
-                                                                       force_document=True,
+                                                                       disable_content_type_detection=True,
                                                                        disable_notification=True,
                                                                        progress=self.__upload_progress,
                                                                        reply_markup=buttons)
