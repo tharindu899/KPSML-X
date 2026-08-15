@@ -178,7 +178,6 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
         if multi_streams:
             multi_streams = await is_multi_streams(path)
         duration = (await get_media_info(path))[0]
-        base_name, extension = ospath.splitext(file_)
         split_size -= 5000000
         while i <= parts or start_time < duration - 4:
             parted_name = f"{file_}.{i:03}"

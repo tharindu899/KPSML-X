@@ -318,16 +318,9 @@ var _renameTargetEl = null;
 function openRenameModal(el) {
     _renameTargetEl = el;
     var oldName = el.getAttribute("data-name");
-    var input = document.getElementById("renameInput");
-    input.value = oldName;
+    document.getElementById("renameInput").value = oldName;
     document.getElementById("renameModal").style.display = "block";
-    input.focus();
-    // Select the base name (excluding extension) so typing replaces it outright,
-    // instead of leaving the cursor mid/end-string where a stray keyboard
-    // autocomplete tap can silently append characters (e.g. "file.txt" -> "file.txtcff").
-    var dotIndex = oldName.lastIndexOf(".");
-    var selectEnd = dotIndex > 0 ? dotIndex : oldName.length;
-    input.setSelectionRange(0, selectEnd);
+    document.getElementById("renameInput").focus();
 }
 
 function closeRenameModal() {
@@ -417,7 +410,7 @@ window.addEventListener("click", function(event) {
     <div id="renameModal" class="rename-modal">
       <div class="rename-modal-content">
         <h2>Rename File</h2>
-        <input type="text" id="renameInput" class="rename-name-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onkeypress="if(event.key==='Enter'){submitRename();}">
+        <input type="text" id="renameInput" class="rename-name-input" onkeypress="if(event.key==='Enter'){submitRename();}">
         <div class="rename-modal-footer">
           <button id="renameSaveBtn" onclick="submitRename()">Save</button>
           <button id="renameCancelBtn" onclick="closeRenameModal()">Cancel</button>
