@@ -331,25 +331,51 @@ function closeRenameModal() {
 function submitRename() {
     if (!_renameTargetEl) return;
     var el = _renameTargetEl;
-    var fid = el.getAttribute("data-fid");
     var oldPath = el.getAttribute("data-path");
     var oldName = el.getAttribute("data-name");
     var newName = document.getElementById("renameInput").value.trim();
     closeRenameModal();
     if (!newName || newName === oldName) return;
     el.textContent = "Renaming...";
-    $.ajax({
-        url: "/app/rename/" + TORRENT_ID,
+
+    // Hard client-side timeout: a stuck qBittorrent WebUI call must never be
+    // able to leave the button stuck on "Renaming..." forever.
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () { controller.abort(); }, 20000);
+
+    fetch("/app/rename/" + TORRENT_ID, {
         method: "POST",
-        data: { old_path: oldPath, new_name: newName },
-        success: function () {
-            location.reload();
-        },
-        error: function (xhr) {
-            alert("Rename failed: " + (xhr.responseText || "Unknown error"));
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "old_path=" + encodeURIComponent(oldPath) + "&new_name=" + encodeURIComponent(newName),
+        signal: controller.signal
+    })
+        .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+                return { ok: res.ok, data: data };
+            });
+        })
+        .then(function (result) {
+            if (!result.ok || result.data.error) {
+                throw new Error(result.data.error || "Unknown error");
+            }
+            // Update in place instead of reloading the whole tree.
+            var newPath = result.data.new_path || oldPath.split('/').slice(0, -1).concat(newName).join('/');
+            el.setAttribute("data-path", newPath);
+            el.setAttribute("data-name", newName);
             el.textContent = "Rename";
-        }
-    });
+            var label = document.querySelector('label[data-name][for="filenode_' + el.getAttribute("data-fid") + '"]');
+            if (label) {
+                label.setAttribute("data-name", newName);
+                label.textContent = newName;
+            }
+        })
+        .catch(function (err) {
+            alert("Rename failed: " + (err && err.message ? err.message : "Timed out or unknown error"));
+            el.textContent = "Rename";
+        })
+        .finally(function () {
+            clearTimeout(timeoutId);
+        });
 }
 
 function renameFile(el) {
@@ -881,33 +907,40 @@ def list_torrent_contents(id_):
 def rename_file(id_):
 
     if len(id_) <= 20:
-        return "Renaming is only supported for qBittorrent torrents.", 400
+        return {"error": "Renaming is only supported for qBittorrent torrents."}, 400
 
     old_path = request.form.get('old_path', '').strip()
     new_name = request.form.get('new_name', '').strip()
     if not old_path or not new_name:
-        return "Missing old_path or new_name", 400
+        return {"error": "Missing old_path or new_name"}, 400
     if '/' in new_name or '\\' in new_name:
-        return "New name cannot contain path separators", 400
+        return {"error": "New name cannot contain path separators"}, 400
 
     parts = old_path.split('/')
     parts[-1] = new_name
     new_path = '/'.join(parts)
 
-    client = qbClient(host="localhost", port="8090")
+    # REQUESTS_ARGS timeout is critical here: without it, a stuck/unresponsive
+    # qBittorrent WebUI leaves the underlying `requests` call hanging forever,
+    # which shows up client-side as the Rename button being stuck on
+    # "Renaming..." with no success or error ever firing.
+    client = qbClient(host="localhost", port="8090", REQUESTS_ARGS={"timeout": (5, 15)})
     try:
         client.torrents_rename_file(torrent_hash=id_, old_path=old_path, new_path=new_path)
     except NotFound404Error as e:
-        client.auth_log_out()
         LOGGER.error(f"{e} Errored while renaming file")
-        return f"Rename failed: {e}", 404
+        return {"error": f"Rename failed: {e}"}, 404
     except Exception as e:
-        client.auth_log_out()
         LOGGER.error(f"{e} Errored while renaming file")
-        return f"Rename failed: {e}", 500
-    client.auth_log_out()
-    LOGGER.info(f"Renamed! Hash: {id_} | {old_path} -> {new_path}")
-    return "OK"
+        return {"error": f"Rename failed: {e}"}, 500
+    else:
+        LOGGER.info(f"Renamed! Hash: {id_} | {old_path} -> {new_path}")
+        return {"error": "", "old_path": old_path, "new_path": new_path, "new_name": new_name}
+    finally:
+        try:
+            client.auth_log_out()
+        except Exception:
+            pass
 
 
 @app.route('/app/files/<string:id_>', methods=['POST'])
