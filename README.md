@@ -193,7 +193,11 @@ There are two methods to build and run the Docker image:
 
 **IMPORTANT NOTES**:
 
-1. Set `BASE_URL_PORT` and `RCLONE_SERVE_PORT` variables to any port you want to use. Default is `80` and `8080` respectively.
+1. Set `BASE_URL_PORT` and `RCLONE_SERVE_PORT` variables to any port you want to use. Default is `80` and `8080` respectively. **The web server binds directly to `BASE_URL_PORT`** — no separate port variable is needed. Whatever value you set, make sure your `docker run -p` flags (or `docker-compose.yml` ports) publish that exact same port, e.g. if `BASE_URL_PORT = "8030"`:
+
+   ```bash
+   sudo docker run -d --name kpsmlx -p 8030:8030 -p 8080:8080 --restart unless-stopped kpsmlx
+   ```
 2. You should stop the running image before deleting the container and you should delete the container before the image.
 3. To delete the container (this will not affect on the image):
 
