@@ -173,48 +173,48 @@ Type {help_command} to get a list of available commands</b>'''
 
     # def get_readable_message(): ---> bot_utilis.py
     ####--------OVERALL MSG HEADER----------
-    STATUS_NAME =       '▸ <b>{Name}</b> '
+    STATUS_NAME =       '<b><i>{Name}</i></b>'
 
     #####---------PROGRESSIVE STATUS-------
-    BAR =               '{Bar} '
-    PROCESSED =         '• {Processed} '
-    STATUS =            '• <a href="{Url}">{Status}</a> '
-    ETA =                                                '• ETA {Eta} '
-    SPEED =             '• {Speed} '
-    ELAPSED =                                     '• Elp {Elapsed} '
-    ENGINE =            '• {Engine} '
-    STA_MODE =          '• {Mode} '
-    SEEDERS =           '• S:{Seeders}'
-    LEECHERS =                                           '/L:{Leechers} '
+    BAR =               '\n┃ {Bar}'
+    PROCESSED =         '\n┠ <b>Processed:</b> {Processed}'
+    STATUS =            '\n┠ <b>Status:</b> <a href="{Url}">{Status}</a>'
+    ETA =                                                ' | <b>ETA:</b> {Eta}'
+    SPEED =             '\n┠ <b>Speed:</b> {Speed}'
+    ELAPSED =                                     ' | <b>Elapsed:</b> {Elapsed}'
+    ENGINE =            '\n┠ <b>Engine:</b> {Engine}'
+    STA_MODE =          '\n┠ <b>Mode:</b> {Mode}'
+    SEEDERS =           '\n┠ <b>Seeders:</b> {Seeders} | '
+    LEECHERS =                                           '<b>Leechers:</b> {Leechers}'
 
     ####--------SEEDING----------
-    SEED_SIZE =      '• {Size} '
-    SEED_SPEED =     '• {Speed} '
-    UPLOADED =                                     '• ↑{Upload} '
-    RATIO =          '• Ratio {Ratio} '
-    TIME =                                         '• {Time} '
-    SEED_ENGINE =    '• {Engine} '
+    SEED_SIZE =      '\n┠ <b>Size: </b>{Size}'
+    SEED_SPEED =     '\n┠ <b>Speed: </b> {Speed} | '
+    UPLOADED =                                     '<b>Uploaded: </b> {Upload}'
+    RATIO =          '\n┠ <b>Ratio: </b> {Ratio} | '
+    TIME =                                         '<b>Time: </b> {Time}'
+    SEED_ENGINE =    '\n┠ <b>Engine:</b> {Engine}'
 
     ####--------NON-PROGRESSIVE + NON SEEDING----------
-    STATUS_SIZE =    '• {Size} '
-    NON_ENGINE =     '• {Engine} '
+    STATUS_SIZE =    '\n┠ <b>Size: </b>{Size}'
+    NON_ENGINE =     '\n┠ <b>Engine:</b> {Engine}'
 
     ####--------OVERALL MSG FOOTER----------
-    USER =              '• {User} '
-    ID =                                                        '[<code>{Id}</code>] '
-    BTSEL =          '• {Btsel} '
-    CANCEL =         '• ✕ {Cancel}\n'
+    USER =              '\n┠ <b>User:</b> <code>{User}</code> | '
+    ID =                                                        '<b>ID:</b> <code>{Id}</code>'
+    BTSEL =          '\n┠ <b>Select:</b> {Btsel}'
+    CANCEL =         '\n┖ {Cancel}\n\n'
 
     ####------FOOTER--------
-    FOOTER = '⌬ <b>Bot Stats</b> '
-    TASKS =  '• Tasks {Tasks} '
-    BOT_TASKS = '• Tasks {Tasks}/{Ttask} Free {Free} '
-    Cpu = '• CPU {cpu}% '
-    FREE =                      '• Free {free} [{free_p}%] '
-    Ram = '• RAM {ram}% '
-    uptime =                     '• Up {uptime} '
-    DL = '• DL {DL}/s '
-    UL =                        '• UL {UL}/s'
+    FOOTER = '⌬ <b><i>Bot Stats</i></b>\n'
+    TASKS =  '┠ <b>Tasks:</b> {Tasks}\n'
+    BOT_TASKS = '┠ <b>Tasks:</b> {Tasks}/{Ttask} | <b>AVL:</b> {Free}\n'
+    Cpu = '┠ <b>CPU:</b> {cpu}% | '
+    FREE =                      '<b>F:</b> {free} [{free_p}%]'
+    Ram = '\n┠ <b>RAM:</b> {ram}% | '
+    uptime =                     '<b>UPTIME:</b> {uptime}'
+    DL = '\n┖ <b>DL:</b> {DL}/s | '
+    UL =                        '<b>UL:</b> {UL}/s'
 
     ###--------BUTTONS-------
     PREVIOUS = '⫷'
@@ -244,8 +244,11 @@ Type {help_command} to get a list of available commands</b>'''
 
     # async def mirror_status(_, message): ----> status.py
     NO_ACTIVE_DL = '''<i>No Active Downloads!</i>
-
-⌬ <b>Bot Stats</b> • CPU {cpu}% • Free {free} [{free_p}%] • RAM {ram}% • Up {uptime}'''
+    
+⌬ <b><i>Bot Stats</i></b>
+┠ <b>CPU:</b> {cpu}% | <b>F:</b> {free} [{free_p}%]
+┖ <b>RAM:</b> {ram} | <b>UPTIME:</b> {uptime}
+    '''
     # ---------------------
 
     # USER Setting --> user_setting.py 
