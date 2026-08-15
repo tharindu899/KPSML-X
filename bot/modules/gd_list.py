@@ -15,11 +15,11 @@ from bot.helper.themes import BotTheme
 
 async def list_buttons(user_id, isRecursive=True):
     buttons = ButtonMaker()
-    buttons.ibutton("Only Folders", f"list_types {user_id} folders {isRecursive}")
-    buttons.ibutton("Only Files", f"list_types {user_id} files {isRecursive}")
-    buttons.ibutton("Both", f"list_types {user_id} both {isRecursive}")
+    buttons.ibutton("🔵 Only Folders", f"list_types {user_id} folders {isRecursive}")
+    buttons.ibutton("🔵 Only Files", f"list_types {user_id} files {isRecursive}")
+    buttons.ibutton("🔵 Both", f"list_types {user_id} both {isRecursive}")
     buttons.ibutton(f"{'✅️' if isRecursive else ''} Recursive", f"list_types {user_id} rec {isRecursive}")
-    buttons.ibutton("Cancel", f"list_types {user_id} cancel")
+    buttons.ibutton("🔴 Cancel", f"list_types {user_id} cancel")
     return buttons.build_menu(2)
 
 

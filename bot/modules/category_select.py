@@ -107,7 +107,7 @@ async def confirm_category(client, query):
     elif len(categories_dict) > 1:
         for _name in categories_dict.keys():
             buttons.ibutton(f'{"✅️" if cat_name == _name else ""} {_name}', f"scat {user_id} {msg_id} {_name.replace(' ', '_')}")
-    buttons.ibutton('Cancel', f'scat {user_id} {msg_id} scancel', 'footer')
+    buttons.ibutton('🔴 Cancel', f'scat {user_id} {msg_id} scancel', 'footer')
     buttons.ibutton(f'Done ({get_readable_time(60 - (time() - bot_cache[msg_id][4]))})', f'scat {user_id} {msg_id} sdone', 'footer')
     await editMessage(query.message, f"<b>Select the category where you want to upload</b>\n\n<i><b>Upload Category:</b></i> <code>{cat_name}</code>\n\n<b>Timeout:</b> 60 sec", buttons.build_menu(3))
 
@@ -136,8 +136,8 @@ async def confirm_dump(client, query):
     if user_dumps:
         for _name in user_dumps.keys():
             buttons.ibutton(f'{"✅️" if upall or cat_name == _name else ""} {_name}', f"dcat {user_id} {msg_id} {_name.replace(' ', '_')}")
-    buttons.ibutton('Upload in All', f'dcat {user_id} {msg_id} All', 'header')
-    buttons.ibutton('Cancel', f'dcat {user_id} {msg_id} dcancel', 'footer')
+    buttons.ibutton('🟢 Upload in All', f'dcat {user_id} {msg_id} All', 'header')
+    buttons.ibutton('🔴 Cancel', f'dcat {user_id} {msg_id} dcancel', 'footer')
     buttons.ibutton(f'Done ({get_readable_time(60 - (time() - bot_cache[msg_id][3]))})', f'dcat {user_id} {msg_id} ddone', 'footer')
     await editMessage(query.message, f"<b>Select the category where you want to upload</b>\n\n<i><b>Upload Category:</b></i> <code>{cat_name}</code>\n\n<b>Timeout:</b> 60 sec", buttons.build_menu(3))
 

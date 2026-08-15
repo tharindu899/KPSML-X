@@ -13,7 +13,7 @@ Type {help_command} to get a list of available commands</b>'''
     OWN_TOKEN_GENERATE = '''<b>Temporary Token is not yours!</b>\n\n<i>Kindly generate your own.</i>'''
     USED_TOKEN = '''<b>Temporary Token already used!</b>\n\n<i>Kindly generate a new one.</i>'''
     LOGGED_PASSWORD = '''<b>Bot Already Logged In via Password</b>\n\n<i>No Need to Accept Temp Tokens.</i>'''
-    ACTIVATE_BUTTON = 'Activate Temporary Token'
+    ACTIVATE_BUTTON = '🟢 Activate Temporary Token'
     TOKEN_MSG = '''<b><u>Generated Temporary Login Token!</u></b>
 <b>Temp Token:</b> <code>{token}</code>
 <b>Validity:</b> {validity}'''
@@ -32,11 +32,11 @@ Type {help_command} to get a list of available commands</b>'''
     WEB_PASTE_BT = '📨 Web Paste (SB)'
     # ---------------------
     # async def bot_help(client, message): ---> __main__.py
-    BASIC_BT = 'Basic'
-    USER_BT = 'Users'
-    MICS_BT = 'Mics'
-    O_S_BT = 'Owner & Sudos'
-    CLOSE_BT = 'Close'
+    BASIC_BT = '🔵 Basic'
+    USER_BT = '🔵 Users'
+    MICS_BT = '🔵 Mics'
+    O_S_BT = '🔵 Owner & Sudos'
+    CLOSE_BT = '🔴 Close'
     HELP_HEADER = "㊂ <b><i>Help Guide Menu!</i></b>\n\n<b>NOTE: <i>Click on any CMD to see more minor detalis.</i></b>"
 
     # async def stats(client, message):

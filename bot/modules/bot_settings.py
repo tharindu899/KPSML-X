@@ -715,23 +715,23 @@ async def load_config():
 async def get_buttons(key=None, edit_type=None, edit_mode=None, mess=None):
     buttons = ButtonMaker()
     if key is None:
-        buttons.ibutton('Config Variables', "botset var")
-        buttons.ibutton('Private Files', "botset private")
-        buttons.ibutton('Qbit Settings', "botset qbit")
-        buttons.ibutton('Aria2c Settings', "botset aria")
-        buttons.ibutton('Close', "botset close")
+        buttons.ibutton('🔵 Config Variables', "botset var")
+        buttons.ibutton('🔵 Private Files', "botset private")
+        buttons.ibutton('🔵 Qbit Settings', "botset qbit")
+        buttons.ibutton('🔵 Aria2c Settings', "botset aria")
+        buttons.ibutton('🔴 Close', "botset close")
         msg = '<b><i>Bot Settings:</i></b>'
     elif key == 'var':
         for k in list(OrderedDict(sorted(config_dict.items())).keys())[START:10+START]:
             buttons.ibutton(k, f"botset editvar {k}")
-        buttons.ibutton('Back', "botset back")
-        buttons.ibutton('Close', "botset close")
+        buttons.ibutton('🔵 Back', "botset back")
+        buttons.ibutton('🔴 Close', "botset close")
         for x in range(0, len(config_dict)-1, 10):
             buttons.ibutton(f'{int(x/10)+1}', f"botset start var {x}", position='footer')
         msg = f'<b>Config Variables</b> | <b>Page: {int(START/10)+1}</b>'
     elif key == 'private':
-        buttons.ibutton('Back', "botset back")
-        buttons.ibutton('Close', "botset close")
+        buttons.ibutton('🔵 Back', "botset back")
+        buttons.ibutton('🔴 Close', "botset close")
         msg = '''<u>Send any of these private files:</u>
         
 <code>config.env, token.pickle, accounts.zip, list_drives.txt, categories.txt, shorteners.txt, cookies.txt, terabox.txt, .netrc or any other file!</code>
@@ -744,12 +744,12 @@ async def get_buttons(key=None, edit_type=None, edit_mode=None, mess=None):
         for k in list(aria2_options.keys())[START:10+START]:
             buttons.ibutton(k, f"botset editaria {k}")
         if STATE == 'view':
-            buttons.ibutton('Edit', "botset edit aria")
+            buttons.ibutton('🔵 Edit', "botset edit aria")
         else:
-            buttons.ibutton('View', "botset view aria")
-        buttons.ibutton('Add New key', "botset editaria newkey")
-        buttons.ibutton('Back', "botset back")
-        buttons.ibutton('Close', "botset close")
+            buttons.ibutton('🔵 View', "botset view aria")
+        buttons.ibutton('🟢 Add New key', "botset editaria newkey")
+        buttons.ibutton('🔵 Back', "botset back")
+        buttons.ibutton('🔴 Close', "botset close")
         for x in range(0, len(aria2_options)-1, 10):
             buttons.ibutton(f'{int(x/10)+1}', f"botset start aria {x}", position='footer')
         msg = f'Aria2c Options | Page: {int(START/10)+1} | State: {STATE}'
@@ -757,11 +757,11 @@ async def get_buttons(key=None, edit_type=None, edit_mode=None, mess=None):
         for k in list(qbit_options.keys())[START:10+START]:
             buttons.ibutton(k, f"botset editqbit {k}")
         if STATE == 'view':
-            buttons.ibutton('Edit', "botset edit qbit")
+            buttons.ibutton('🔵 Edit', "botset edit qbit")
         else:
-            buttons.ibutton('View', "botset view qbit")
-        buttons.ibutton('Back', "botset back")
-        buttons.ibutton('Close', "botset close")
+            buttons.ibutton('🔵 View', "botset view qbit")
+        buttons.ibutton('🔵 Back', "botset back")
+        buttons.ibutton('🔴 Close', "botset close")
         for x in range(0, len(qbit_options)-1, 10):
             buttons.ibutton(
                 f'{int(x/10)+1}', f"botset start qbit {x}", position='footer')
@@ -772,17 +772,17 @@ async def get_buttons(key=None, edit_type=None, edit_mode=None, mess=None):
         if mess.chat.type == ChatType.PRIVATE:
             msg += f'<b>Value:</b> <spoiler> {config_dict.get(key, "None")} </spoiler>\n\n'
         else:
-            buttons.ibutton('View Var Value',
+            buttons.ibutton('🔵 View Var Value',
                             f"botset showvar {key}", position="header")
-        buttons.ibutton('Back', "botset back var", position="footer")
+        buttons.ibutton('🔵 Back', "botset back var", position="footer")
         if key not in bool_vars:
             if not edit_mode:
-                buttons.ibutton('Edit Value', f"botset editvar {key} edit")
+                buttons.ibutton('🔵 Edit Value', f"botset editvar {key} edit")
             else:
-                buttons.ibutton('Stop Edit', f"botset editvar {key}")
+                buttons.ibutton('🔴 Stop Edit', f"botset editvar {key}")
         if key not in ['TELEGRAM_HASH', 'TELEGRAM_API', 'OWNER_ID', 'BOT_TOKEN'] and key not in bool_vars:
-            buttons.ibutton('Reset', f"botset resetvar {key}")
-        buttons.ibutton('Close', "botset close", position="footer")
+            buttons.ibutton('🔴 Reset', f"botset resetvar {key}")
+        buttons.ibutton('🔴 Close', "botset close", position="footer")
         if edit_mode and key in ['SUDO_USERS', 'CMD_SUFFIX', 'OWNER_ID', 'USER_SESSION_STRING', 'TELEGRAM_HASH',
                                  'TELEGRAM_API', 'AUTHORIZED_CHATS', 'DATABASE_URL', 'BOT_TOKEN', 'DOWNLOAD_DIR']:
             msg += '<b>Note:</b> Restart required for this edit to take effect!\n\n'
@@ -790,22 +790,22 @@ async def get_buttons(key=None, edit_type=None, edit_mode=None, mess=None):
             msg += '<i>Send a valid value for the above Var.</i> <b>Timeout:</b> 60 sec'
         if key in bool_vars:
             msg += '<i>Choose a valid value for the above Var</i>'
-            buttons.ibutton('True', f"botset boolvar {key} on")
-            buttons.ibutton('False', f"botset boolvar {key} off")
+            buttons.ibutton('🟢 True', f"botset boolvar {key} on")
+            buttons.ibutton('🔴 False', f"botset boolvar {key} off")
     elif edit_type == 'editaria':
-        buttons.ibutton('Back', "botset back aria")
+        buttons.ibutton('🔵 Back', "botset back aria")
         if key != 'newkey':
-            buttons.ibutton('Default', f"botset resetaria {key}")
-            buttons.ibutton('Empty String', f"botset emptyaria {key}")
-        buttons.ibutton('Close', "botset close")
+            buttons.ibutton('🔵 Default', f"botset resetaria {key}")
+            buttons.ibutton('🔵 Empty String', f"botset emptyaria {key}")
+        buttons.ibutton('🔴 Close', "botset close")
         if key == 'newkey':
             msg = 'Send a key with value. Example: https-proxy-user:value'
         else:
             msg = f'Send a valid value for {key}. Timeout: 60 sec'
     elif edit_type == 'editqbit':
-        buttons.ibutton('Back', "botset back qbit")
-        buttons.ibutton('Empty String', f"botset emptyqbit {key}")
-        buttons.ibutton('Close', "botset close")
+        buttons.ibutton('🔵 Back', "botset back qbit")
+        buttons.ibutton('🔵 Empty String', f"botset emptyqbit {key}")
+        buttons.ibutton('🔴 Close', "botset close")
         msg = f'Send a valid value for {key}. Timeout: 60 sec'
     button = buttons.build_menu(1) if key is None else buttons.build_menu(2)
     return msg, button
@@ -1034,8 +1034,8 @@ async def update_private_file(_, message, pre_message):
         if '@github.com' in config_dict['UPSTREAM_REPO']:
             buttons = ButtonMaker()
             msg = '<i>Do you want to Upload (Git Push) your file to <b>UPSTREAM_REPO</b> ?</i>'
-            buttons.ibutton('Yes!', f"botset push {file_name}")
-            buttons.ibutton('No!', "botset close")
+            buttons.ibutton('🟢 Yes!', f"botset push {file_name}")
+            buttons.ibutton('🔴 No!', "botset close")
             await sendMessage(message, msg, buttons.build_menu(2))
         else:
             await deleteMessage(message)

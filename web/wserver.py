@@ -169,13 +169,15 @@ input[type="submit"] {
     display: block;
     height: 5.5vh;
     border: 2px solid rgba(255, 255, 255, 0.11);
-    background-color: #0D1117;
+    background-color: #e53935;
+    color: white;
     font-size: 16px;
     font-weight: 500;
+    cursor: pointer;
 }
 
 input[type="submit"]:hover, input[type="submit"]:focus{
-    background-color: rgba(255, 255, 255, 0.068);
+    background-color: #c62828;
     cursor: pointer;
 }
 
@@ -210,6 +212,23 @@ input[type="submit"]:hover, input[type="submit"]:focus{
   top: 0;
   z-index: 10000;
 }
+
+.rename-btn{
+    display: inline-block;
+    margin-left: 0.6rem;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 12px;
+    background-color: #1e88e5;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 200ms ease;
+}
+
+.rename-btn:hover{
+    background-color: #1565c0;
+}
 </style>
 <script>
 function s_validate() {
@@ -218,6 +237,29 @@ function s_validate() {
         return false;
         }
     }
+
+var TORRENT_ID = "{torrent_id}";
+
+function renameFile(el) {
+    var fid = el.getAttribute("data-fid");
+    var oldPath = el.getAttribute("data-path");
+    var oldName = el.getAttribute("data-name");
+    var newName = prompt("Rename file:", oldName);
+    if (!newName || newName.trim() === "" || newName === oldName) return;
+    el.textContent = "🔵 Renaming...";
+    $.ajax({
+        url: "/app/rename/" + TORRENT_ID,
+        method: "POST",
+        data: { old_path: oldPath, new_name: newName.trim() },
+        success: function () {
+            location.reload();
+        },
+        error: function (xhr) {
+            alert("Rename failed: " + (xhr.responseText || "Unknown error"));
+            el.textContent = "🔵 ✏️ Rename";
+        }
+    });
+}
 </script>
 </head>
 <body>
@@ -555,7 +597,7 @@ section button{
     width: 100%;
     height: 5.5vh;
     border: 2px solid rgba(255, 255, 255, 0.11);
-    background-color: #0D1117;
+    background-color: #1e88e5;
     color: white;
     font-size: 16px;
     font-weight: 500;
@@ -564,7 +606,7 @@ section button{
 }
 
 section button:hover, section button:focus{
-    background-color: rgba(255, 255, 255, 0.068);
+    background-color: #1565c0;
 }
 
 section span{
@@ -720,7 +762,40 @@ def list_torrent_contents(id_):
     else:
         res = aria2.client.get_files(id_)
         cont = make_tree(res, True)
-    return page.replace("{My_content}", cont[0]).replace("{form_url}", f"/app/files/{id_}?pin_code={pincode}")
+    return page.replace("{My_content}", cont[0]).replace("{form_url}", f"/app/files/{id_}?pin_code={pincode}").replace("{torrent_id}", id_)
+
+
+@app.route('/app/rename/<string:id_>', methods=['POST'])
+def rename_file(id_):
+
+    if len(id_) <= 20:
+        return "Renaming is only supported for qBittorrent torrents.", 400
+
+    old_path = request.form.get('old_path', '').strip()
+    new_name = request.form.get('new_name', '').strip()
+    if not old_path or not new_name:
+        return "Missing old_path or new_name", 400
+    if '/' in new_name or '\\' in new_name:
+        return "New name cannot contain path separators", 400
+
+    parts = old_path.split('/')
+    parts[-1] = new_name
+    new_path = '/'.join(parts)
+
+    client = qbClient(host="localhost", port="8090")
+    try:
+        client.torrents_rename_file(torrent_hash=id_, old_path=old_path, new_path=new_path)
+    except NotFound404Error as e:
+        client.auth_log_out()
+        LOGGER.error(f"{e} Errored while renaming file")
+        return f"Rename failed: {e}", 404
+    except Exception as e:
+        client.auth_log_out()
+        LOGGER.error(f"{e} Errored while renaming file")
+        return f"Rename failed: {e}", 500
+    client.auth_log_out()
+    LOGGER.info(f"Renamed! Hash: {id_} | {old_path} -> {new_path}")
+    return "OK"
 
 
 @app.route('/app/files/<string:id_>', methods=['POST'])
@@ -816,12 +891,16 @@ def homepage():
             text-align: center;
         }
         .button {
-            background-color: #0001f0;
+            background-color: #2e7d32;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 200ms ease;
+        }
+        .button:hover {
+            background-color: #1b5e20;
         }
         .image {
             border-radius: 12px;
