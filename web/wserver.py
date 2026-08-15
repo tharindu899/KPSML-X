@@ -416,7 +416,7 @@ window.addEventListener("click", function(event) {
         $("body").find("ul:first-child").attr("id", "treeview");
         $(".parent").prepend("<span>▶</span>");
 
-        $("span").click(function (e) {
+        $("span").not(".rename-btn").click(function (e) {
           e.stopPropagation();
           e.stopImmediatePropagation();
           $(this).parent( ".parent" ).find(">ul").toggle("slow");
