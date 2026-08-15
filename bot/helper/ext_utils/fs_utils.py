@@ -4,7 +4,7 @@ from aiofiles.os import remove as aioremove, path as aiopath, listdir, rmdir, ma
 from aioshutil import rmtree as aiormtree
 from shutil import rmtree, disk_usage
 from magic import Magic
-from re import split as re_split, I, search as re_search
+from re import split as re_split, I, search as re_search, escape as re_escape
 from subprocess import run as srun
 from sys import exit as sexit
 
@@ -158,20 +158,27 @@ def check_storage_threshold(size, threshold, arch=False, alloc=False):
 async def join_files(path):
     files = await listdir(path)
     results = []
+    exists = False
     for file_ in files:
-        if re_search(r"\.0+2$", file_) and await sync_to_async(get_mime_type, f'{path}/{file_}') == 'application/octet-stream':
+        if re_search(r"\.0+2$", file_) and await sync_to_async(get_mime_type, f'{path}/{file_}') not in (
+            'application/x-7z-compressed', 'application/zip'
+        ):
+            exists = True
             final_name = file_.rsplit('.', 1)[0]
-            cmd = f'cat {path}/{final_name}.* > {path}/{final_name}'
+            fpath = f'{path}/{final_name}'
+            cmd = f'cat "{fpath}."* > "{fpath}"'
             _, stderr, code = await cmd_exec(cmd, True)
             if code != 0:
                 LOGGER.error(f'Failed to join {final_name}, stderr: {stderr}')
+                if await aiopath.isfile(fpath):
+                    await aioremove(fpath)
             else:
                 results.append(final_name)
-        else:
-            LOGGER.warning('No Binary files to join!')
-    if results:
+    if not exists:
+        LOGGER.warning('No Binary files to join!')
+    elif results:
         LOGGER.info('Join Completed!')
         for res in results:
             for file_ in files:
-                if re_search(fr"{res}\.0[0-9]+$", file_):
+                if re_search(fr"{re_escape(res)}\.0[0-9]+$", file_):
                     await aioremove(f'{path}/{file_}')
