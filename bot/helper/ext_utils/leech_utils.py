@@ -18,6 +18,23 @@ from bot.helper.ext_utils.bot_utils import cmd_exec, sync_to_async, get_readable
 from bot.helper.ext_utils.fs_utils import ARCH_EXT, get_mime_type
 from bot.helper.ext_utils.telegraph_helper import telegraph
 
+# ffmpeg can't infer the muxer from a split part's filename when the
+# extension isn't last (parts are named "name.ext.NNN" so the
+# Telegram-Stremio addon's part-detection regex recognizes them), so the
+# container format must be passed explicitly via -f based on the
+# ORIGINAL file's extension.
+FFMPEG_MUX_FORMATS = {
+    'mkv': 'matroska',
+    'mp4': 'mp4',
+    'm4v': 'mp4',
+    'mov': 'mov',
+    'webm': 'webm',
+    'avi': 'avi',
+    'ts': 'mpegts',
+    'flv': 'flv',
+    'wmv': 'asf',
+}
+
 
 async def is_multi_streams(path):
     try:
@@ -183,12 +200,20 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
         first_out_path = None
         total_real_duration = 0.0
         part_count = 0
+        # Telegram-Stremio's own part-detection regex only matches
+        # "name.ext.NNN" (extension THEN number), not "name.partNNN.ext" -
+        # so parts must be named this way or the addon can't group/stitch
+        # them into one stream at all. Since the extension is no longer
+        # last, ffmpeg can't guess the muxer from the filename, so it must
+        # be passed explicitly via -f.
+        src_ext = extension.lstrip('.').lower()
+        out_fmt = FFMPEG_MUX_FORMATS.get(src_ext, 'matroska')
         while i <= parts or start_time < duration - 4:
-            parted_name = f"{base_name}.part{i:03}{extension}"
+            parted_name = f"{file_}.{i:03}"
             out_path = ospath.join(dirpath, parted_name)
             cmd = [bot_cache['pkgs'][2], "-hide_banner", "-loglevel", "error", "-ss", str(start_time), "-i", path,
                    "-fs", str(split_size), "-map", "0", "-map_chapters", "-1", "-async", "1", "-strict",
-                   "-2", "-c", "copy", out_path]
+                   "-2", "-c", "copy", "-f", out_fmt, out_path]
             if not multi_streams:
                 del cmd[10]
                 del cmd[10]
