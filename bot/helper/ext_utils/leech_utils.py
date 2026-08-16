@@ -18,22 +18,6 @@ from bot.helper.ext_utils.bot_utils import cmd_exec, sync_to_async, get_readable
 from bot.helper.ext_utils.fs_utils import ARCH_EXT, get_mime_type
 from bot.helper.ext_utils.telegraph_helper import telegraph
 
-# ffmpeg can't infer the muxer from a split part's filename anymore
-# (parts now end in ".mkv.001" instead of ".part001.mkv"), so the
-# container format must be passed explicitly via -f based on the
-# ORIGINAL file's extension.
-FFMPEG_MUX_FORMATS = {
-    'mkv': 'matroska',
-    'mp4': 'mp4',
-    'm4v': 'mp4',
-    'mov': 'mov',
-    'webm': 'webm',
-    'avi': 'avi',
-    'ts': 'mpegts',
-    'flv': 'flv',
-    'wmv': 'asf',
-}
-
 
 async def is_multi_streams(path):
     try:
@@ -194,15 +178,17 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
         if multi_streams:
             multi_streams = await is_multi_streams(path)
         duration = (await get_media_info(path))[0]
+        base_name, extension = ospath.splitext(file_)
         split_size -= 5000000
-        src_ext = ospath.splitext(file_)[1].lstrip('.').lower()
-        out_fmt = FFMPEG_MUX_FORMATS.get(src_ext, 'matroska')
+        first_out_path = None
+        total_real_duration = 0.0
+        part_count = 0
         while i <= parts or start_time < duration - 4:
-            parted_name = f"{file_}.{i:03}"
+            parted_name = f"{base_name}.part{i:03}{extension}"
             out_path = ospath.join(dirpath, parted_name)
             cmd = [bot_cache['pkgs'][2], "-hide_banner", "-loglevel", "error", "-ss", str(start_time), "-i", path,
                    "-fs", str(split_size), "-map", "0", "-map_chapters", "-1", "-async", "1", "-strict",
-                   "-2", "-c", "copy", "-f", out_fmt, out_path]
+                   "-2", "-c", "copy", out_path]
             if not multi_streams:
                 del cmd[10]
                 del cmd[10]
@@ -244,8 +230,42 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
             elif lpd <= 3:
                 await aioremove(out_path)
                 break
+            if extension.lower() in ('.mkv', '.webm'):
+                if first_out_path is None:
+                    first_out_path = out_path
+                total_real_duration += lpd
+                part_count += 1
             start_time += lpd - 3
             i += 1
+
+        # Apps like Nuvio that stitch split parts into one continuous
+        # stream (e.g. Telegram-Stremio's virtual_stream_generator) only
+        # ever parse PART 1's own Matroska header for the whole virtual
+        # file's duration - they never re-probe later parts. So instead of
+        # writing each part's own (correct but individually-short)
+        # duration, patch part 1's header with the SUM of every part's
+        # real duration, which is what a seamless multi-part player needs
+        # to show/seek the correct total runtime.
+        if first_out_path and part_count > 1:
+            try:
+                h, rem = divmod(total_real_duration, 3600)
+                m, s = divmod(rem, 60)
+                dur_str = f"{int(h):02}:{int(m):02}:{s:012.9f}"
+                fix_proc = await create_subprocess_exec(
+                    "mkvpropedit", first_out_path, "--edit", "info", "--set", f"duration={dur_str}",
+                    stdout=PIPE, stderr=PIPE)
+                _, mkv_err = await fix_proc.communicate()
+                if fix_proc.returncode != 0:
+                    LOGGER.warning(
+                        f"mkvpropedit total-duration fix failed for {first_out_path}: {mkv_err.decode().strip()}")
+                else:
+                    LOGGER.info(
+                        f"Patched {first_out_path} header duration to combined total {dur_str} for multi-part streaming.")
+            except FileNotFoundError:
+                LOGGER.warning(
+                    "mkvpropedit not found (install mkvtoolnix) - multi-part total duration metadata won't be patched.")
+            except Exception as e:
+                LOGGER.warning(f"mkvpropedit total-duration fix error for {first_out_path}: {e}")
     else:
         out_path = ospath.join(dirpath, f"{file_}.")
         listener.suproc = await create_subprocess_exec("split", "--numeric-suffixes=1", "--suffix-length=3",
